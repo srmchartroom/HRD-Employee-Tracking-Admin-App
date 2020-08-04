@@ -1,0 +1,20 @@
+{
+  "name": "HRD-Employee-Tracking-Admin-App",
+  "version": "1.0.0",
+  "description": "A Node-Based CLI application for querying employee information and updating it",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srmchartroom/HRD-Employee-Tracking-Admin-App.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srmchartroom/HRD-Employee-Tracking-Admin-App/issues"
+  },
+  "homepage": "https://github.com/srmchartroom/HRD-Employee-Tracking-Admin-App#readme"
+}
