@@ -2,8 +2,9 @@
   "name": "HRD-Employee-Tracking-Admin-App",
   "version": "1.0.0",
   "description": "A Node-Based CLI application for querying employee information and updating it",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
