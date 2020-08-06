@@ -93,7 +93,7 @@ function actions() {
           break;
 
         case "Remove Employee":
-          removeEmp();
+          removeEmp(); // DONE
           break;
 
         case "View All Roles":
@@ -101,7 +101,7 @@ function actions() {
           break;
 
         case "Add Role":
-          addRole();
+          addRole(); // DONE
           break;
 
         case "Remove Role":
