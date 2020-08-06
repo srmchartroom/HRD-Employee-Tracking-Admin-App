@@ -65,31 +65,31 @@ function actions() {
     .then(function (answer) {
       switch (answer.action) {
         case "View All Employees":
-          viewAllEmp();
+          viewAllEmp(); // DONE
           break;
 
         case "View All Employees By Department":
-          viewEmpByDept();
+          viewEmpByDept(); // DONE
           break;
 
         case "View All Employees By Manager":
-          viewEmpByMgr();
+          viewEmpByMgr(); // DONE
           break;
 
         case "View All Employees By Role":
-          viewEmpByRole();
+          viewEmpByRole(); // DONE
           break;
 
         case "Add Employee":
-          addEmp();
+          addEmp(); // DONE
           break;
 
         case "Update Employee's Role":
-          updateEmpRole();
+          updateEmpRole(); // DONE
           break;
 
         case "Update Employee's Manager":
-          updateEmpMgr();
+          updateEmpMgr(); // DONE
           break;
 
         case "Remove Employee":
@@ -97,7 +97,7 @@ function actions() {
           break;
 
         case "View All Roles":
-          viewAllRoles();
+          viewAllRoles(); // DONE
           break;
 
         case "Add Role":
@@ -109,7 +109,7 @@ function actions() {
           break;
 
         case "View All Departments":
-          viewAllDepts();
+          viewAllDepts(); // DONE
           break;
 
         case "Add Department":
@@ -121,11 +121,11 @@ function actions() {
           break;
 
         case "Exit":
-          connection.end();
+          connection.end(); // DONE
           break;
 
         default:
-          console.log("Not a valid selection.");
+          console.log("Not a valid selection."); // DONE
           break;
       }
     });
