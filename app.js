@@ -479,7 +479,7 @@ function updateEmpMgr() {
           {
             name: "selectManager",
             type: "list",
-            message: "Select the role for this employee from the existing titles below.",
+            message: "Select the manager for this employee from the existing employees below.",
             choices: empResults,
           },
         ])
@@ -519,6 +519,7 @@ function updateEmpMgr() {
 }
 //! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function removeEmp() {
   // Case 9: Remove Employee
   // Use Inquire (list) to display current list of employees and ask which employee to remove.
@@ -528,9 +529,63 @@ function removeEmp() {
   // if "no" then reshow the employee list
   // Possibly add "exit" to employee list...
   // Return/reshow initial action list
-  console.log("Case 9: Remove Employee");
-  actions();
+  console.log(" --------------------------- \n REMOVE AN EXISTING EMPLOYEE \n ---------------------------");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.id AS 'empId' FROM employee e",
+    function (err, res) {
+      if (err) throw err;
+      const empResults = [];
+      const empIdResults = [];
+      for (let i = 0; i < res.length; i++) {
+        // simply for CLI UI to display list of existing employees to choose to update
+        let empObj = res[i].Employee;
+        empResults.push(empObj);
+        // for comparing inquirer selected employee string to set manager id to correct employee
+        let empIdObj = {
+          full: res[i].Employee,
+          empid: res[i].empId,
+        };
+        empIdResults.push(empIdObj);
+      }
+      // Employee Update question prompts
+      inquirer
+        .prompt([
+          {
+            name: "selectEmployee",
+            type: "list",
+            message: "Select the employee to delete",
+            choices: empResults,
+          },
+        ])
+        .then((answers) => {
+          // get the information of the chosen item
+          let chosenEmpId;
+          for (let i = 0; i < empIdResults.length; i++) {
+            if (empIdResults[i].full == answers.selectEmployee) {
+              chosenEmpId = empIdResults[i].empid;
+            }
+          }
+          for (let i = 0; i < empIdResults.length; i++) {
+            if (empIdResults[i].full == answers.selectManager) {
+              chosenMgrId = empIdResults[i].empid;
+            }
+          }
+          connection.query(
+            "DELETE FROM employee WHERE ?",
+            {
+              id: chosenEmpId,
+            },
+            function (error) {
+              if (error) throw err;
+              console.log("Employee successfully deleted!");
+              actions();
+            }
+          );
+        });
+    }
+  );
 }
+//! ----------------------------------------------------------
 
 //! DONE -----------------------------------------------------
 function viewAllRoles() {
@@ -538,30 +593,96 @@ function viewAllRoles() {
   // Use Console.table? or simply console.log
   // Loop through roles table and display them in the console (possibly using console.table)
   // Return/reshow initial action list
-  console.log("Case 10: View All Roles");
-  connection.query("SELECT r.title AS Title FROM role r ORDER BY r.title;", function (err, res) {
-    if (err) throw err;
-    let tableResults = [];
-    for (var i = 0; i < res.length; i++) {
-      var roleObj = [res[i].Title];
-      tableResults.push(roleObj);
-    }
+  console.log(" ---------------------- \n VIEW ALL EXISTING ROLES \n ----------------------");
+  connection.query(
+    "SELECT r.title AS 'Title', r.salary AS 'Salary', r.department_id AS 'DepartmentId', d.name AS 'Department' FROM role r INNER JOIN department d ON d.id = r.department_id ORDER BY r.title;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (var i = 0; i < res.length; i++) {
+        var roleObj = [res[i].Title, res[i].Salary, res[i].Department];
+        tableResults.push(roleObj);
+      }
 
-    console.table(["Title"], tableResults);
-    actions();
-  });
+      console.table(["Title", "Salary", "Department"], tableResults);
+      actions();
+    }
+  );
 }
 //! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function addRole() {
   // Case 11: Add Roles
   // Use Inquirer (input) to ask name of role to add
   // Possibly check to see if role requested for adding is in the roles table already or not
   // if already there, show validation message "Role already exists. Please add a new role."
   // Return/reshow initial action list
-  console.log("Case 11: Add Role");
-  actions();
+  console.log(" ---------------- \n ADD A ROLE \n ----------------");
+  connection.query(
+    "SELECT r.title AS 'Title', r.id AS 'Id', r.department_id, d.id AS 'DeptId', d.name AS 'Department' FROM role r INNER JOIN department d ON d.id = r.department_id ORDER BY r.title;",
+    function (err, res) {
+      if (err) throw err;
+      const depResults = [];
+      const depIdResults = [];
+      for (let i = 0; i < res.length; i++) {
+        // simply for CLI UI to display list of existing employees to choose to update
+        let depObj = res[i].Department;
+        depResults.push(depObj);
+        // for comparing inquirer selected employee string to set manager id to correct employee
+        let depIdObj = {
+          department: res[i].Department,
+          deptid: res[i].DeptId,
+        };
+        depIdResults.push(depIdObj);
+      }
+      inquirer
+        .prompt([
+          {
+            name: "title",
+            type: "input",
+            message: "Enter the new job role's title.",
+          },
+          {
+            name: "salary",
+            type: "input",
+            message: "Enter the annual base salary for the new role.",
+          },
+          {
+            name: "department",
+            type: "list",
+            message: "Select the department to which this role belongs.",
+            choices: depResults,
+          },
+        ])
+        .then((answers) => {
+          let chosenDepId;
+          // Setting chosenDepId var to department_id that matches the department name selected
+          for (let i = 0; i < depIdResults.length; i++) {
+            if (depIdResults[i].department == answers.department) {
+              chosenDepId = depIdResults[i].deptid;
+            }
+          }
+          connection.query(
+            "INSERT INTO role SET ?",
+            [
+              {
+                title: answers.title,
+                salary: answers.salary,
+                department_id: chosenDepId,
+              },
+            ],
+            function (error) {
+              if (error) throw err;
+              console.log("New Role successfully added!");
+              actions();
+            }
+          );
+        });
+    }
+  );
 }
+//! ----------------------------------------------------------
 
 function removeRole() {
   // Case 12: Remove Roles
