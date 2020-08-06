@@ -7,6 +7,7 @@
 const mysql = require("mysql");
 const cTable = require("console.table");
 const inquirer = require("inquirer");
+// inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 const path = require("path");
 const fs = require("fs");
 
@@ -15,7 +16,7 @@ const fs = require("fs");
 // const writeFileAsync = util.promisify(fs.writeFile);
 // const express = require("express");
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host: "localhost",
   // Your port; if not 3306
   port: 3306,
@@ -51,7 +52,6 @@ function actions() {
         "Add Employee",
         "Update Employee's Role",
         "Update Employee's Manager",
-        "Update Employee's Department",
         "Remove Employee",
         "View All Roles",
         "Add Role",
@@ -90,10 +90,6 @@ function actions() {
 
         case "Update Employee's Manager":
           updateEmpMgr();
-          break;
-
-        case "Update Employee's Department":
-          updateEmpDept();
           break;
 
         case "Remove Employee":
@@ -139,9 +135,11 @@ function actions() {
 function viewAllEmp() {
   // Case 1: View All Employees
   // Return/reshow initial action list
-  console.log("Case 1: View All Employees");
+  console.log(
+    " ---------------------------------- \n ALL COMPANY EMPLOYEES AT THIS TIME \n ----------------------------------"
+  );
   connection.query(
-    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY e.last_name;",
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY e.last_name;",
     function (err, res) {
       if (err) throw err;
       let tableResults = [];
@@ -162,9 +160,11 @@ function viewEmpByDept() {
   // loop through the employees table,
   // and display each employee (using console.table)
   // Return/reshow initial action list
-  console.log("Case 2: View Employees By Department");
+  console.log(
+    " ----------------------------------- \n ALL COMPANY EMPLOYEES BY DEPARTMENT \n -----------------------------------"
+  );
   connection.query(
-    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY d.name;",
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY d.name;",
     function (err, res) {
       if (err) throw err;
       let tableResults = [];
@@ -186,9 +186,11 @@ function viewEmpByMgr() {
   // for each manager (if different from previous i), map the employees table...
   // and display the employee (using console.table)
   // Return/reshow initial action list
-  console.log("Case 3: View Employees By Manager");
+  console.log(
+    " -------------------------------- \n ALL COMPANY EMPLOYEES BY MANAGER \n --------------------------------"
+  );
   connection.query(
-    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY m.last_name;",
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY m.last_name;",
     function (err, res) {
       if (err) throw err;
       let tableResults = [];
@@ -210,9 +212,9 @@ function viewEmpByRole() {
   // for each role, map the employees table
   // and display the employee (using console.table)
   // Return/reshow initial action list
-  console.log("Case 4: View Employees By Role");
+  console.log(" ----------------------------- \n ALL COMPANY EMPLOYEES BY ROLE \n -----------------------------");
   connection.query(
-    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY r.title;",
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY r.title;",
     function (err, res) {
       if (err) throw err;
       let tableResults = [];
@@ -228,6 +230,7 @@ function viewEmpByRole() {
 }
 //! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function addEmp() {
   // Case 5: Add Employee
   // Use Inquirer (input) to ask first name of employee to add
@@ -240,10 +243,108 @@ function addEmp() {
   // Update the selected department on enter
   // Possibly show the completed employee that's added upon final selection (using console.table)
   // Return/reshow initial action list
-  console.log("Case 5: Add Employee");
-  actions();
+  console.log(" -------------------------- \n ADD A NEW COMPANY EMPLOYEE \n --------------------------");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.first_name, e.last_name, e.id AS 'empId', e.role_id, r.title AS 'Title', r.id AS 'Roleid' FROM employee e INNER JOIN role r ON r.id = e.role_id",
+    function (err, res) {
+      if (err) throw err;
+      const rolResults = [];
+      const rolIdResults = [];
+      const manResults = [];
+      const manIdResults = [];
+      for (let i = 0; i < res.length; i++) {
+        // simply for CLI UI to display list of existing titles to choose role
+        let rolObj = res[i].Title;
+        rolResults.push(rolObj);
+        // for comparing inquirer selected title string and setting corresponding role id
+        let rolIdObj = {
+          title: res[i].Title,
+          roleid: res[i].Roleid,
+        };
+        rolIdResults.push(rolIdObj);
+        // simply for CLI UI to display list of existing employee to choose a manager from
+        let manObj = res[i].Employee;
+        manResults.push(manObj);
+        // for comparing inquirer selected manager name and setting corresponding manager id
+        let manIdObj = {
+          manid: res[i].empId,
+          first: res[i].first_name,
+          last: res[i].last_name,
+          full: res[i].Employee,
+        };
+        manIdResults.push(manIdObj);
+      }
+      // simply to provide a final "None" option for the manager selection list in the CLI UI
+      manResults.push("NONE");
+      // Employee Entry question prompts
+      inquirer
+        .prompt([
+          {
+            name: "first",
+            type: "input",
+            message: "Enter employee's first name.",
+          },
+          {
+            name: "last",
+            type: "input",
+            message: "Enter employee's last name.",
+          },
+          {
+            name: "selectManager",
+            type: "list",
+            message: "Select the manager for this employee from the below.",
+            choices: manResults,
+          },
+          {
+            name: "selectRole",
+            type: "list",
+            message: "Select the role for this employee from the existing titles below.",
+            choices: rolResults,
+          },
+        ])
+        .then((answers) => {
+          let chosenMgrId;
+          let chosenRoleId;
+          // Setting chosenRoleId var to role_id that matches the title selected in list
+          for (let i = 0; i < rolIdResults.length; i++) {
+            if (rolIdResults[i].title == answers.selectRole) {
+              chosenRoleId = rolIdResults[i].roleid;
+            }
+          }
+          // Setting chosenMgrId var to employee_id that matches the employee selected in manager list
+          if (answers.selectManager !== "NONE") {
+            for (let i = 0; i < manIdResults.length; i++) {
+              if (manIdResults[i].full == answers.selectManager) {
+                chosenMgrId = manIdResults[i].manid;
+              }
+            }
+            // Setting chosenMgrId to null if selected "NONE" in manager list
+          } else {
+            chosenMgrId = null;
+          }
+          connection.query(
+            "INSERT INTO employee SET ?",
+            [
+              {
+                first_name: answers.first,
+                last_name: answers.last,
+                role_id: chosenRoleId,
+                manager_id: chosenMgrId,
+              },
+            ],
+            function (error) {
+              if (error) throw err;
+              console.log("New Employee successfully added!");
+              actions();
+            }
+          );
+        });
+    }
+  );
 }
+//! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function updateEmpRole() {
   // Case 6: Update Employee's Role
   // Use inquire (list) to display current list of employees and ask which employee to update
@@ -252,10 +353,92 @@ function updateEmpRole() {
   // Update the selected role on enter
   // Possibly show the completed employee that's updated upon final selection (using console.table)
   // Return/reshow initial action list
-  console.log("Case 6: Update Employee's Role");
-  actions();
+  console.log(
+    " ------------------------------------------- \n UPDATE AN EXISTING EMPLOYEE'S ROLE OR TITLE \n -------------------------------------------"
+  );
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.first_name, e.last_name, e.id AS 'empId', e.role_id, r.title AS 'Title', r.id AS 'Roleid' FROM employee e LEFT JOIN role r ON r.id = e.role_id",
+    function (err, res) {
+      if (err) throw err;
+      const empResults = [];
+      const empIdResults = [];
+      const rolResults = [];
+      const rolIdResults = [];
+      for (let i = 0; i < res.length; i++) {
+        // simply for CLI UI to display list of existing employees to choose to update
+        let empObj = res[i].Employee;
+        empResults.push(empObj);
+        if (res[i].Title !== null) {
+          // simply for CLI UI to display list of existing roles/titles to choose for selected employee
+          let rolObj = res[i].Title;
+          rolResults.push(rolObj);
+          // for comparing inquirer selected title string and setting corresponding role id
+          let rolIdObj = {
+            title: res[i].Title,
+            roleid: res[i].Roleid,
+          };
+          rolIdResults.push(rolIdObj);
+        }
+        // for comparing inquirer selected employee string to set role id to correct employee
+        let empIdObj = {
+          full: res[i].Employee,
+          empid: res[i].empId,
+        };
+        empIdResults.push(empIdObj);
+      }
+      // Employee Update question prompts
+      inquirer
+        .prompt([
+          {
+            name: "selectEmployee",
+            type: "list",
+            message: "Select the employee to update their role",
+            choices: empResults,
+          },
+          {
+            name: "selectRole",
+            type: "list",
+            message: "Select the role for this employee from the existing titles below.",
+            choices: rolResults,
+          },
+        ])
+        .then((answers) => {
+          // get the information of the chosen item
+          let chosenRoleId;
+          let chosenEmpId;
+          for (let i = 0; i < rolIdResults.length; i++) {
+            if (rolIdResults[i].title == answers.selectRole) {
+              chosenRoleId = rolIdResults[i].roleid;
+            }
+          }
+          for (let i = 0; i < empIdResults.length; i++) {
+            if (empIdResults[i].full == answers.selectEmployee) {
+              chosenEmpId = empIdResults[i].empid;
+            }
+          }
+          connection.query(
+            "UPDATE employee SET ? WHERE ?",
+            [
+              {
+                role_id: chosenRoleId,
+              },
+              {
+                id: chosenEmpId,
+              },
+            ],
+            function (error) {
+              if (error) throw err;
+              console.log("Role updated successfully!");
+              actions();
+            }
+          );
+        });
+    }
+  );
 }
+//! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function updateEmpMgr() {
   // Case 7: Update Employee's Manager
   // Use inquire (list) to display current list of employees and ask which employee to update
@@ -264,21 +447,77 @@ function updateEmpMgr() {
   // Update the selected manager on enter
   // Possibly show the completed employee that's updated upon final selection (using console.table)
   // Return/reshow initial action list
-  console.log("Case 7: Update Employee's Manager");
-  actions();
+  console.log(
+    " ------------------------------------- \n UPDATE AN EXISTING EMPLOYEE'S MANAGER \n -------------------------------------"
+  );
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.id AS 'empId' FROM employee e",
+    function (err, res) {
+      if (err) throw err;
+      const empResults = [];
+      const empIdResults = [];
+      for (let i = 0; i < res.length; i++) {
+        // simply for CLI UI to display list of existing employees to choose to update
+        let empObj = res[i].Employee;
+        empResults.push(empObj);
+        // for comparing inquirer selected employee string to set manager id to correct employee
+        let empIdObj = {
+          full: res[i].Employee,
+          empid: res[i].empId,
+        };
+        empIdResults.push(empIdObj);
+      }
+      // Employee Update question prompts
+      inquirer
+        .prompt([
+          {
+            name: "selectEmployee",
+            type: "list",
+            message: "Select the employee to update their role",
+            choices: empResults,
+          },
+          {
+            name: "selectManager",
+            type: "list",
+            message: "Select the role for this employee from the existing titles below.",
+            choices: empResults,
+          },
+        ])
+        .then((answers) => {
+          // get the information of the chosen item
+          let chosenMgrId;
+          let chosenEmpId;
+          for (let i = 0; i < empIdResults.length; i++) {
+            if (empIdResults[i].full == answers.selectEmployee) {
+              chosenEmpId = empIdResults[i].empid;
+            }
+          }
+          for (let i = 0; i < empIdResults.length; i++) {
+            if (empIdResults[i].full == answers.selectManager) {
+              chosenMgrId = empIdResults[i].empid;
+            }
+          }
+          connection.query(
+            "UPDATE employee SET ? WHERE ?",
+            [
+              {
+                manager_id: chosenMgrId,
+              },
+              {
+                id: chosenEmpId,
+              },
+            ],
+            function (error) {
+              if (error) throw err;
+              console.log("Manager updated successfully!");
+              actions();
+            }
+          );
+        });
+    }
+  );
 }
-
-function updateEmpDept() {
-  // Case 8: Update Employee's Department
-  // Use inquire (list) to display current list of employees and ask which employee to update
-  // console.log or in the message display the employee's current dept.
-  // Use inquire (list) to display list of departments (other than the already assigned dept?)
-  // Update the selected department on enter
-  // Possibly show the completed employee that's updated upon final selection (using console.table)
-  // Return/reshow initial action list
-  console.log("Case 8: Update Employee's Department");
-  actions();
-}
+//! ----------------------------------------------------------
 
 function removeEmp() {
   // Case 9: Remove Employee
@@ -341,7 +580,9 @@ function viewAllDepts() {
   // Case 13: View All Departments
   // Use Console.table? or simply console.log
   // Loop through departments table and display them in the console
-  console.log("Case 13: View All Departments");
+  console.log(
+    " ------------------------------------ \n ALL COMPANY DEPARTMENTS AT THIS TIME \n ------------------------------------"
+  );
   connection.query("SELECT d.name AS Department FROM department d ORDER BY d.name;", function (err, res) {
     if (err) throw err;
     let tableResults = [];
@@ -350,7 +591,7 @@ function viewAllDepts() {
       tableResults.push(deptObj);
     }
 
-    console.table(["Title"], tableResults);
+    console.table(["Department"], tableResults);
     actions();
   });
 }
@@ -377,139 +618,3 @@ function removeDept() {
   console.log("Case 15: Remove Department");
   actions();
 }
-
-// function artistSearch() {
-//    inquirer
-//      .prompt({
-//        name: "artist",
-//        type: "input",
-//        message: "What artist would you like to search for?",
-//      })
-//      .then(function (answer) {
-//        var query = "SELECT position, song, year FROM top5000 WHERE ?";
-//        connection.query(query, { artist: answer.artist }, function (err, res) {
-//          if (err) throw err;
-//          for (var i = 0; i < res.length; i++) {
-//            console.log("Position: " + res[i].position + " || Song: " + res[i].song + " || Year: " + res[i].year);
-//          }
-//          runSearch();
-//        });
-//      });
-//  }
-
-//  function multiSearch() {
-//    var query = "SELECT artist FROM top5000 GROUP BY artist HAVING count(*) > 1";
-//    connection.query(query, function (err, res) {
-//      if (err) throw err;
-//      for (var i = 0; i < res.length; i++) {
-//        console.log(res[i].artist);
-//      }
-//      runSearch();
-//    });
-//  }
-
-//  function rangeSearch() {
-//    inquirer
-//      .prompt([
-//        {
-//          name: "start",
-//          type: "input",
-//          message: "Enter starting position: ",
-//          validate: function (value) {
-//            if (isNaN(value) === false) {
-//              return true;
-//            }
-//            return false;
-//          },
-//        },
-//        {
-//          name: "end",
-//          type: "input",
-//          message: "Enter ending position: ",
-//          validate: function (value) {
-//            if (isNaN(value) === false) {
-//              return true;
-//            }
-//            return false;
-//          },
-//        },
-//      ])
-//      .then(function (answer) {
-//        var query = "SELECT position,song,artist,year FROM top5000 WHERE position BETWEEN ? AND ?";
-//        connection.query(query, [answer.start, answer.end], function (err, res) {
-//          if (err) throw err;
-//          for (var i = 0; i < res.length; i++) {
-//            console.log(
-//              "Position: " +
-//                res[i].position +
-//                " || Song: " +
-//                res[i].song +
-//                " || Artist: " +
-//                res[i].artist +
-//                " || Year: " +
-//                res[i].year
-//            );
-//          }
-//          runSearch();
-//        });
-//      });
-//  }
-
-//  function songSearch() {
-//    inquirer
-//      .prompt({
-//        name: "song",
-//        type: "input",
-//        message: "What song would you like to look for?",
-//      })
-//      .then(function (answer) {
-//        console.log(answer.song);
-//        connection.query("SELECT * FROM top5000 WHERE ?", { song: answer.song }, function (err, res) {
-//          if (err) throw err;
-//          console.log(
-//            "Position: " +
-//              res[0].position +
-//              " || Song: " +
-//              res[0].song +
-//              " || Artist: " +
-//              res[0].artist +
-//              " || Year: " +
-//              res[0].year
-//          );
-//          runSearch();
-//        });
-//      });
-//  }
-
-//  function songAndAlbumSearch {
-//    inquirer.prompt({
-//      name: "artist",
-//      type: "input",
-//      message: "What artist would you like to search for?"
-//    }).then(function(answer) {
-//      let query = "SELECT top_albums.year, top_albums.album, top_albums.position, top5000.song, top5000.artist FROM top_albums INNER JOIN top5000 ON (top_albums.artist=top5000.artist) AND (top_albums.year=top_5000.year) WHERE (top_albums.artist = ? AND top5000.artist = ?) ORDER BY top_albums.year, top_albums.position";
-//      connection.query(query) , [answer.artist, answer.artist], function (err, res) {
-//        if (err) throw err;
-//          console.log(
-//            "Position: " +
-//              res[0].position +
-//
-//              " || Year: " +
-//              res[0].year
-//
-//              " || Album Position: " +
-//              res[0].position
-//
-//              " || Artist: " +
-//              res[0].artist
-//
-//              " || Song: " +
-//              res[0].song +
-//
-//              " || Album: " +
-//              res[0].album 0+
-//
-//          );
-//      }
-//    })
-//  }
