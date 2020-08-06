@@ -17,16 +17,13 @@ const fs = require("fs");
 
 var connection = mysql.createConnection({
   host: "localhost",
-
   // Your port; if not 3306
   port: 3306,
-
   // Your username
   user: "root",
-
   // Your password
   password: "",
-  database: "top_songsDB",
+  database: "employees",
 });
 
 // LAUNCH FUNCTION ON CONNECT
@@ -36,6 +33,11 @@ connection.connect(function (err) {
 });
 
 function runApplication() {
+  console.log("Welcome to the HRD Employee Tracking & Administration Application");
+  actions();
+}
+// FUNCTION TO KICK OFF APPLICATION
+function actions() {
   inquirer
     .prompt({
       name: "action",
@@ -62,106 +64,169 @@ function runApplication() {
     })
     .then(function (answer) {
       switch (answer.action) {
-        //! CASES THAT VIEW EMPLOYEES
-        // Case 1: View All Employees
         case "View All Employees":
           viewAllEmp();
           break;
-        // Case 2: View Employees X Dept.
+
         case "View All Employees By Department":
           viewEmpByDept();
           break;
-        // Case 3: View Employees X Manager
+
         case "View All Employees By Manager":
           viewEmpByMgr();
           break;
-        // Case 4: View Employees X Role
+
         case "View All Employees By Role":
           viewEmpByRole();
           break;
-        //! CASES THAT CHANGE EMPLOYEE INFO
-        // Case 5: Add Employee
+
         case "Add Employee":
           addEmp();
           break;
-        // Case 6: Update Employee's Role
+
         case "Update Employee's Role":
           updateEmpRole();
           break;
-        // Case 7: Update Employee's Manager
+
         case "Update Employee's Manager":
           updateEmpMgr();
           break;
-        // Case 8: Update Employee's Department
+
         case "Update Employee's Department":
           updateEmpDept();
           break;
-        // Case 9: Remove Employee
+
         case "Remove Employee":
           removeEmp();
           break;
-        //! CASES THAT VIEW OR CHANGE ROLES LIST
-        // Case 10: View All Roles
+
         case "View All Roles":
           viewAllRoles();
           break;
-        // Case 11: Add Roles
+
         case "Add Role":
           addRole();
           break;
-        // Case 12: Remove Roles
+
         case "Remove Role":
           removeRole();
           break;
-        //! CASES THAT VIEW OR CHANGE DEPARTMENTS LIST
-        // Case 13: View All Departments
+
         case "View All Departments":
           viewAllDepts();
           break;
-        // Case 14: Add Department
+
         case "Add Department":
           addDept();
           break;
-        // Case 15: Remove Department
+
         case "Remove Department":
           removeDept();
           break;
-        //! CASES THAT VIEW OR CHANGE DEPARTMENTS LIST
-        // Case 16: View All Departments
+
         case "Exit":
           connection.end();
+          break;
+
+        default:
+          console.log("Not a valid selection.");
           break;
       }
     });
 }
 
+//! DONE -----------------------------------------------------
 function viewAllEmp() {
   // Case 1: View All Employees
   // Return/reshow initial action list
-}
+  console.log("Case 1: View All Employees");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY e.last_name;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (var i = 0; i < res.length; i++) {
+        var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
+        tableResults.push(empObj);
+      }
 
+      console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
+      actions();
+    }
+  );
+}
+//! ----------------------------------------------------------
+//! DONE -----------------------------------------------------
 function viewEmpByDept() {
   // Case 2: View Employees X Dept.
   // loop through the employees table,
   // and display each employee (using console.table)
   // Return/reshow initial action list
-}
+  console.log("Case 2: View Employees By Department");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY d.name;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (var i = 0; i < res.length; i++) {
+        var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
+        tableResults.push(empObj);
+      }
 
+      console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
+      actions();
+    }
+  );
+}
+//! ----------------------------------------------------------
+//! DONE -----------------------------------------------------
 function viewEmpByMgr() {
   // Case 3: View Employees X Manager
   // loop through the employees table,
   // for each manager (if different from previous i), map the employees table...
   // and display the employee (using console.table)
   // Return/reshow initial action list
-}
+  console.log("Case 3: View Employees By Manager");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY m.last_name;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (var i = 0; i < res.length; i++) {
+        var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
+        tableResults.push(empObj);
+      }
 
+      console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
+      actions();
+    }
+  );
+}
+//! ----------------------------------------------------------
+//! DONE -----------------------------------------------------
 function viewEmpByRole() {
   // Case 4: View Employees X Role
   // loop through the roles table...
   // for each role, map the employees table
   // and display the employee (using console.table)
   // Return/reshow initial action list
+  console.log("Case 4: View Employees By Role");
+  connection.query(
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id ORDER BY r.title;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (var i = 0; i < res.length; i++) {
+        var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
+        tableResults.push(empObj);
+      }
+
+      console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
+      actions();
+    }
+  );
 }
+//! ----------------------------------------------------------
 
 function addEmp() {
   // Case 5: Add Employee
@@ -175,6 +240,8 @@ function addEmp() {
   // Update the selected department on enter
   // Possibly show the completed employee that's added upon final selection (using console.table)
   // Return/reshow initial action list
+  console.log("Case 5: Add Employee");
+  actions();
 }
 
 function updateEmpRole() {
@@ -185,6 +252,8 @@ function updateEmpRole() {
   // Update the selected role on enter
   // Possibly show the completed employee that's updated upon final selection (using console.table)
   // Return/reshow initial action list
+  console.log("Case 6: Update Employee's Role");
+  actions();
 }
 
 function updateEmpMgr() {
@@ -195,6 +264,8 @@ function updateEmpMgr() {
   // Update the selected manager on enter
   // Possibly show the completed employee that's updated upon final selection (using console.table)
   // Return/reshow initial action list
+  console.log("Case 7: Update Employee's Manager");
+  actions();
 }
 
 function updateEmpDept() {
@@ -205,6 +276,8 @@ function updateEmpDept() {
   // Update the selected department on enter
   // Possibly show the completed employee that's updated upon final selection (using console.table)
   // Return/reshow initial action list
+  console.log("Case 8: Update Employee's Department");
+  actions();
 }
 
 function removeEmp() {
@@ -216,14 +289,30 @@ function removeEmp() {
   // if "no" then reshow the employee list
   // Possibly add "exit" to employee list...
   // Return/reshow initial action list
+  console.log("Case 9: Remove Employee");
+  actions();
 }
 
+//! DONE -----------------------------------------------------
 function viewAllRoles() {
   // Case 10: View All Roles
   // Use Console.table? or simply console.log
   // Loop through roles table and display them in the console (possibly using console.table)
   // Return/reshow initial action list
+  console.log("Case 10: View All Roles");
+  connection.query("SELECT r.title AS Title FROM role r ORDER BY r.title;", function (err, res) {
+    if (err) throw err;
+    let tableResults = [];
+    for (var i = 0; i < res.length; i++) {
+      var roleObj = [res[i].Title];
+      tableResults.push(roleObj);
+    }
+
+    console.table(["Title"], tableResults);
+    actions();
+  });
 }
+//! ----------------------------------------------------------
 
 function addRole() {
   // Case 11: Add Roles
@@ -231,6 +320,8 @@ function addRole() {
   // Possibly check to see if role requested for adding is in the roles table already or not
   // if already there, show validation message "Role already exists. Please add a new role."
   // Return/reshow initial action list
+  console.log("Case 11: Add Role");
+  actions();
 }
 
 function removeRole() {
@@ -241,13 +332,29 @@ function removeRole() {
   // if "yes" then remove the role
   // if "no" then reshow the role list
   // Possibly add "exit" to role list...
+  console.log("Case 12: Remove Role");
+  actions();
 }
 
+//! DONE -----------------------------------------------------
 function viewAllDepts() {
   // Case 13: View All Departments
   // Use Console.table? or simply console.log
   // Loop through departments table and display them in the console
+  console.log("Case 13: View All Departments");
+  connection.query("SELECT d.name AS Department FROM department d ORDER BY d.name;", function (err, res) {
+    if (err) throw err;
+    let tableResults = [];
+    for (var i = 0; i < res.length; i++) {
+      var deptObj = [res[i].Department];
+      tableResults.push(deptObj);
+    }
+
+    console.table(["Title"], tableResults);
+    actions();
+  });
 }
+//! ----------------------------------------------------------
 
 function addDept() {
   // Case 14: Add Department
@@ -255,6 +362,8 @@ function addDept() {
   // Possibly check to see if department requested for adding is in the dept. list already or not:
   // if already there, show validation message "Department already exists. Please add a new department."
   // Return/reshow initial action list
+  console.log("Case 14: Add Department");
+  actions();
 }
 
 function removeDept() {
@@ -265,6 +374,8 @@ function removeDept() {
   // if "yes" then remove the department
   // if "no" then reshow the the department list
   // Possibly add "exit" to department list...
+  console.log("Case 15: Remove Department");
+  actions();
 }
 
 // function artistSearch() {
