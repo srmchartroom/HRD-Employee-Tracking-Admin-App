@@ -108,7 +108,7 @@ function actions() {
           break;
 
         case "Remove Role":
-          removeRole();
+          removeRole(); // DONE
           break;
 
         case "View All Departments":
@@ -124,6 +124,7 @@ function actions() {
           break;
 
         case "Exit":
+          console.log("GOODBYE!");
           connection.end(); // DONE
           break;
 
@@ -150,7 +151,7 @@ function viewAllEmp() {
         var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
         tableResults.push(empObj);
       }
-
+      console.clear();
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -175,7 +176,7 @@ function viewEmpByDept() {
         var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
         tableResults.push(empObj);
       }
-
+      console.clear();
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -202,6 +203,7 @@ function viewEmpByMgr() {
         tableResults.push(empObj);
       }
 
+      console.clear();
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -225,7 +227,7 @@ function viewEmpByRole() {
         var empObj = [res[i].Employee, res[i].Title, res[i].Salary, res[i].Department, res[i].Manager];
         tableResults.push(empObj);
       }
-
+      console.clear();
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -337,6 +339,7 @@ function addEmp() {
             ],
             function (error) {
               if (error) throw err;
+              console.clear();
               console.log("New Employee successfully added!");
               actions();
             }
@@ -359,37 +362,28 @@ function updateEmpRole() {
   console.log(
     " ------------------------------------------- \n UPDATE AN EXISTING EMPLOYEE'S ROLE OR TITLE \n -------------------------------------------"
   );
+  //! Var to hold the employee chosen
+  let chosenEmpId;
+  let chosenRoleId;
+  // Initial db query to determine employee list and id
   connection.query(
-    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.first_name, e.last_name, e.id AS 'empId', e.role_id, r.title AS 'Title', r.id AS 'Roleid' FROM employee e LEFT JOIN role r ON r.id = e.role_id",
+    "SELECT CONCAT(e.first_name, ' ', e.last_name) AS 'Employee', e.id AS 'empId', e.role_id, r.title AS 'Title', r.id AS 'Roleid' FROM employee e LEFT JOIN role r ON r.id = e.role_id",
     function (err, res) {
       if (err) throw err;
       const empResults = [];
       const empIdResults = [];
-      const rolResults = [];
-      const rolIdResults = [];
+
       for (let i = 0; i < res.length; i++) {
         // simply for CLI UI to display list of existing employees to choose to update
         let empObj = res[i].Employee;
         empResults.push(empObj);
-        if (res[i].Title !== null) {
-          // simply for CLI UI to display list of existing roles/titles to choose for selected employee
-          let rolObj = res[i].Title;
-          rolResults.push(rolObj);
-          // for comparing inquirer selected title string and setting corresponding role id
-          let rolIdObj = {
-            title: res[i].Title,
-            roleid: res[i].Roleid,
-          };
-          rolIdResults.push(rolIdObj);
-        }
-        // for comparing inquirer selected employee string to set role id to correct employee
         let empIdObj = {
           full: res[i].Employee,
           empid: res[i].empId,
         };
         empIdResults.push(empIdObj);
       }
-      // Employee Update question prompts
+      empResults.push("BACK TO MAIN MENU");
       inquirer
         .prompt([
           {
@@ -398,43 +392,77 @@ function updateEmpRole() {
             message: "Select the employee to update their role",
             choices: empResults,
           },
-          {
-            name: "selectRole",
-            type: "list",
-            message: "Select the role for this employee from the existing titles below.",
-            choices: rolResults,
-          },
         ])
         .then((answers) => {
-          // get the information of the chosen item
-          let chosenRoleId;
-          let chosenEmpId;
-          for (let i = 0; i < rolIdResults.length; i++) {
-            if (rolIdResults[i].title == answers.selectRole) {
-              chosenRoleId = rolIdResults[i].roleid;
+          if (answers.selectEmployee !== "BACK TO MAIN MENU") {
+            for (let i = 0; i < empIdResults.length; i++) {
+              if (empIdResults[i].full == answers.selectEmployee) {
+                chosenEmpId = empIdResults[i].empid;
+              }
             }
+          } else {
+            console.clear();
+            actions();
           }
-          for (let i = 0; i < empIdResults.length; i++) {
-            if (empIdResults[i].full == answers.selectEmployee) {
-              chosenEmpId = empIdResults[i].empid;
+          connection.query("SELECT r.title AS 'Title', r.id AS 'Roleid' FROM role r", function (err, resp) {
+            if (err) throw err;
+            const rolResults = [];
+            const rolIdResults = [];
+            for (let i = 0; i < resp.length; i++) {
+              if (resp[i].Title !== null) {
+                // simply for CLI UI to display list of existing roles/titles to choose for selected employee
+                let rolObj = resp[i].Title;
+                rolResults.push(rolObj);
+                // for comparing inquirer selected title string and setting corresponding role id
+                let rolIdObj = {
+                  title: resp[i].Title,
+                  roleid: resp[i].Roleid,
+                };
+                rolIdResults.push(rolIdObj);
+              }
             }
-          }
-          connection.query(
-            "UPDATE employee SET ? WHERE ?",
-            [
-              {
-                role_id: chosenRoleId,
-              },
-              {
-                id: chosenEmpId,
-              },
-            ],
-            function (error) {
-              if (error) throw err;
-              console.log("Role updated successfully!");
-              actions();
-            }
-          );
+            rolResults.push("BACK TO MAIN MENU");
+            // Employee Update question prompts
+            inquirer
+              .prompt([
+                {
+                  name: "selectRole",
+                  type: "list",
+                  message: "Select the role for this employee from the existing titles below.",
+                  choices: rolResults,
+                },
+              ])
+              .then((answer) => {
+                // get the information of the chosen item
+                for (let i = 0; i < rolIdResults.length; i++) {
+                  if (rolIdResults[i].title == answer.selectRole) {
+                    chosenRoleId = rolIdResults[i].roleid;
+                  }
+                }
+                if (answers.selectRole !== "BACK TO MAIN MENU") {
+                  connection.query(
+                    "UPDATE employee SET ? WHERE ?",
+                    [
+                      {
+                        role_id: chosenRoleId,
+                      },
+                      {
+                        id: chosenEmpId,
+                      },
+                    ],
+                    function (error) {
+                      if (error) throw err;
+                      console.clear();
+                      console.log("Role updated successfully!");
+                      actions();
+                    }
+                  );
+                } else {
+                  console.clear();
+                  actions();
+                }
+              });
+          });
         });
     }
   );
@@ -512,6 +540,7 @@ function updateEmpMgr() {
             ],
             function (error) {
               if (error) throw err;
+              console.clear();
               console.log("Manager updated successfully!");
               actions();
             }
@@ -550,6 +579,7 @@ function removeEmp() {
         };
         empIdResults.push(empIdObj);
       }
+      empResults.push("BACK TO MAIN MENU");
       // Employee Update question prompts
       inquirer
         .prompt([
@@ -561,29 +591,35 @@ function removeEmp() {
           },
         ])
         .then((answers) => {
-          // get the information of the chosen item
-          let chosenEmpId;
-          for (let i = 0; i < empIdResults.length; i++) {
-            if (empIdResults[i].full == answers.selectEmployee) {
-              chosenEmpId = empIdResults[i].empid;
+          if (answers.selectEmployee !== "BACK TO MAIN MENU") {
+            // get the information of the chosen item
+            let chosenEmpId;
+            for (let i = 0; i < empIdResults.length; i++) {
+              if (empIdResults[i].full == answers.selectEmployee) {
+                chosenEmpId = empIdResults[i].empid;
+              }
             }
+            for (let i = 0; i < empIdResults.length; i++) {
+              if (empIdResults[i].full == answers.selectManager) {
+                chosenMgrId = empIdResults[i].empid;
+              }
+            }
+            connection.query(
+              "DELETE FROM employee WHERE ?",
+              {
+                id: chosenEmpId,
+              },
+              function (error) {
+                if (error) throw err;
+                console.clear();
+                console.log("Employee successfully deleted!");
+                actions();
+              }
+            );
+          } else {
+            console.clear();
+            actions();
           }
-          for (let i = 0; i < empIdResults.length; i++) {
-            if (empIdResults[i].full == answers.selectManager) {
-              chosenMgrId = empIdResults[i].empid;
-            }
-          }
-          connection.query(
-            "DELETE FROM employee WHERE ?",
-            {
-              id: chosenEmpId,
-            },
-            function (error) {
-              if (error) throw err;
-              console.log("Employee successfully deleted!");
-              actions();
-            }
-          );
         });
     }
   );
@@ -606,7 +642,7 @@ function viewAllRoles() {
         var roleObj = [res[i].Title, res[i].Salary, res[i].Department];
         tableResults.push(roleObj);
       }
-
+      console.clear();
       console.table(["Title", "Salary", "Department"], tableResults);
       actions();
     }
@@ -677,6 +713,7 @@ function addRole() {
             ],
             function (error) {
               if (error) throw err;
+              console.clear();
               console.log("New Role successfully added!");
               actions();
             }
@@ -687,6 +724,7 @@ function addRole() {
 }
 //! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function removeRole() {
   // Case 12: Remove Roles
   // Use Inquire (list) to display current list of roles and ask which role to remove.
@@ -696,8 +734,47 @@ function removeRole() {
   // if "no" then reshow the role list
   // Possibly add "exit" to role list...
   console.log("Case 12: Remove Role");
-  actions();
+  connection.query("SELECT r.title AS 'Title' FROM role r", function (err, res) {
+    if (err) throw err;
+    const rolResults = [];
+    for (let i = 0; i < res.length; i++) {
+      // simply for CLI UI to display list of existing employees to choose to update
+      let rolObj = res[i].Title;
+      rolResults.push(rolObj);
+    }
+    rolResults.push("BACK TO MAIN MENU");
+    // Role delete question prompts
+    inquirer
+      .prompt([
+        {
+          name: "selectRole",
+          type: "list",
+          message: "Select the role to delete",
+          choices: rolResults,
+        },
+      ])
+      .then((answers) => {
+        if (answers.selectRole !== "BACK TO MAIN MENU") {
+          connection.query(
+            "DELETE FROM role WHERE ?",
+            {
+              title: answers.selectRole,
+            },
+            function (error) {
+              if (error) throw err;
+              console.clear();
+              console.log("Role successfully deleted!");
+              actions();
+            }
+          );
+        } else {
+          console.clear();
+          actions();
+        }
+      });
+  });
 }
+//! ----------------------------------------------------------
 
 //! DONE -----------------------------------------------------
 function viewAllDepts() {
@@ -714,7 +791,7 @@ function viewAllDepts() {
       var deptObj = [res[i].Department];
       tableResults.push(deptObj);
     }
-
+    console.clear();
     console.table(["Department"], tableResults);
     actions();
   });
