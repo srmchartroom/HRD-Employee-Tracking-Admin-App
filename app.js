@@ -7,6 +7,7 @@
 const mysql = require("mysql");
 const cTable = require("console.table");
 const inquirer = require("inquirer");
+const dotenv = require("dotenv").config();
 // inquirer.registerPrompt("search-list", require("inquirer-search-list"));
 const path = require("path");
 const fs = require("fs");
@@ -17,13 +18,15 @@ const fs = require("fs");
 // const express = require("express");
 
 const connection = mysql.createConnection({
-  host: "localhost",
+  // Your host location
+  host: process.env.DB_HOST,
   // Your port; if not 3306
   port: 3306,
-  // Your username
-  user: "root",
-  // Your password
-  password: "",
+  // Your username (replace "process.env.DB_USER" with your username - root or otherwise)
+  user: process.env.DB_USER,
+  // Your password (replace "process.env.DB_PASS" with your password)
+  password: process.env.DB_PASS,
+  // Your database name
   database: "employees",
 });
 
