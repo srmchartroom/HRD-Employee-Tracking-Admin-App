@@ -60,6 +60,7 @@ function actions() {
         "Add Role",
         "Remove Role",
         "View All Departments",
+        "View Total Utilized Budget By Department",
         "Add Department",
         "Remove Department",
         "Exit",
@@ -116,11 +117,15 @@ function actions() {
           break;
 
         case "Add Department":
-          addDept();
+          addDept(); // DONE
           break;
 
         case "Remove Department":
-          removeDept();
+          removeDept(); // DONE
+          break;
+
+        case "View Total Utilized Budget By Department":
+          viewBudget(); // DONE
           break;
 
         case "Exit":
@@ -139,9 +144,7 @@ function actions() {
 function viewAllEmp() {
   // Case 1: View All Employees
   // Return/reshow initial action list
-  console.log(
-    " ---------------------------------- \n ALL COMPANY EMPLOYEES AT THIS TIME \n ----------------------------------"
-  );
+
   connection.query(
     "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY e.last_name;",
     function (err, res) {
@@ -152,6 +155,9 @@ function viewAllEmp() {
         tableResults.push(empObj);
       }
       console.clear();
+      console.log(
+        " ---------------------------------- \n ALL COMPANY EMPLOYEES AT THIS TIME \n ----------------------------------"
+      );
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -164,9 +170,7 @@ function viewEmpByDept() {
   // loop through the employees table,
   // and display each employee (using console.table)
   // Return/reshow initial action list
-  console.log(
-    " ----------------------------------- \n ALL COMPANY EMPLOYEES BY DEPARTMENT \n -----------------------------------"
-  );
+
   connection.query(
     "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY d.name;",
     function (err, res) {
@@ -177,6 +181,9 @@ function viewEmpByDept() {
         tableResults.push(empObj);
       }
       console.clear();
+      console.log(
+        " ----------------------------------- \n ALL COMPANY EMPLOYEES BY DEPARTMENT \n -----------------------------------"
+      );
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -190,9 +197,7 @@ function viewEmpByMgr() {
   // for each manager (if different from previous i), map the employees table...
   // and display the employee (using console.table)
   // Return/reshow initial action list
-  console.log(
-    " -------------------------------- \n ALL COMPANY EMPLOYEES BY MANAGER \n --------------------------------"
-  );
+
   connection.query(
     "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY m.last_name;",
     function (err, res) {
@@ -204,6 +209,9 @@ function viewEmpByMgr() {
       }
 
       console.clear();
+      console.log(
+        " -------------------------------- \n ALL COMPANY EMPLOYEES BY MANAGER \n --------------------------------"
+      );
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -217,7 +225,7 @@ function viewEmpByRole() {
   // for each role, map the employees table
   // and display the employee (using console.table)
   // Return/reshow initial action list
-  console.log(" ----------------------------- \n ALL COMPANY EMPLOYEES BY ROLE \n -----------------------------");
+
   connection.query(
     "SELECT CONCAT(e.first_name, ' ', e.last_name) AS Employee, r.title AS Title, r.salary AS Salary, d.name AS Department, IFNULL(CONCAT(m.first_name, ' ', m.last_name), 'NONE') AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.manager_id LEFT JOIN role r ON r.id = e.role_id LEFT JOIN department d ON d.id = r.department_id ORDER BY r.title;",
     function (err, res) {
@@ -228,6 +236,7 @@ function viewEmpByRole() {
         tableResults.push(empObj);
       }
       console.clear();
+      console.log(" ----------------------------- \n ALL COMPANY EMPLOYEES BY ROLE \n -----------------------------");
       console.table(["Employee", "Title", "Salary", "Department", "Manager"], tableResults);
       actions();
     }
@@ -340,7 +349,7 @@ function addEmp() {
             function (error) {
               if (error) throw err;
               console.clear();
-              console.log("New Employee successfully added!");
+              console.log("NEW EMPLOYEE ADDED SUCCESSFULLY!");
               actions();
             }
           );
@@ -453,7 +462,7 @@ function updateEmpRole() {
                     function (error) {
                       if (error) throw err;
                       console.clear();
-                      console.log("Role updated successfully!");
+                      console.log("ROLE UPDATED SUCCESSFULLY!");
                       actions();
                     }
                   );
@@ -541,7 +550,7 @@ function updateEmpMgr() {
             function (error) {
               if (error) throw err;
               console.clear();
-              console.log("Manager updated successfully!");
+              console.log("MANAGER UPDATED SUCCESSFULLY!");
               actions();
             }
           );
@@ -612,7 +621,7 @@ function removeEmp() {
               function (error) {
                 if (error) throw err;
                 console.clear();
-                console.log("Employee successfully deleted!");
+                console.log("EMPLOYEE REMOVED SUCCESSFULLY!");
                 actions();
               }
             );
@@ -632,7 +641,7 @@ function viewAllRoles() {
   // Use Console.table? or simply console.log
   // Loop through roles table and display them in the console (possibly using console.table)
   // Return/reshow initial action list
-  console.log(" ---------------------- \n VIEW ALL EXISTING ROLES \n ----------------------");
+
   connection.query(
     "SELECT r.title AS 'Title', r.salary AS 'Salary', r.department_id AS 'DepartmentId', d.name AS 'Department' FROM role r INNER JOIN department d ON d.id = r.department_id ORDER BY r.title;",
     function (err, res) {
@@ -643,6 +652,7 @@ function viewAllRoles() {
         tableResults.push(roleObj);
       }
       console.clear();
+      console.log(" ---------------------- \n VIEW ALL EXISTING ROLES \n ----------------------");
       console.table(["Title", "Salary", "Department"], tableResults);
       actions();
     }
@@ -714,7 +724,7 @@ function addRole() {
             function (error) {
               if (error) throw err;
               console.clear();
-              console.log("New Role successfully added!");
+              console.log("NEW ROLE ADDED SUCCESSFULLY!");
               actions();
             }
           );
@@ -733,7 +743,7 @@ function removeRole() {
   // if "yes" then remove the role
   // if "no" then reshow the role list
   // Possibly add "exit" to role list...
-  console.log("Case 12: Remove Role");
+  console.log(" ------------------ \n REMOVE ROLE \n ------------------");
   connection.query("SELECT r.title AS 'Title' FROM role r", function (err, res) {
     if (err) throw err;
     const rolResults = [];
@@ -763,7 +773,7 @@ function removeRole() {
             function (error) {
               if (error) throw err;
               console.clear();
-              console.log("Role successfully deleted!");
+              console.log("ROLE REMOVED SUCCESSFULLY!");
               actions();
             }
           );
@@ -781,9 +791,6 @@ function viewAllDepts() {
   // Case 13: View All Departments
   // Use Console.table? or simply console.log
   // Loop through departments table and display them in the console
-  console.log(
-    " ------------------------------------ \n ALL COMPANY DEPARTMENTS AT THIS TIME \n ------------------------------------"
-  );
   connection.query("SELECT d.name AS Department FROM department d ORDER BY d.name;", function (err, res) {
     if (err) throw err;
     let tableResults = [];
@@ -792,22 +799,51 @@ function viewAllDepts() {
       tableResults.push(deptObj);
     }
     console.clear();
+    console.log(
+      " ------------------------------------ \n ALL COMPANY DEPARTMENTS AT THIS TIME \n ------------------------------------"
+    );
     console.table(["Department"], tableResults);
     actions();
   });
 }
 //! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function addDept() {
   // Case 14: Add Department
   // Use Inquirer (input) to ask name of department to add
   // Possibly check to see if department requested for adding is in the dept. list already or not:
   // if already there, show validation message "Department already exists. Please add a new department."
   // Return/reshow initial action list
-  console.log("Case 14: Add Department");
-  actions();
+  console.log(" ---------------- \n ADD A DEPARTMENT \n ----------------");
+  inquirer
+    .prompt([
+      {
+        name: "dep",
+        type: "input",
+        message: "Enter the name of the new department to add.",
+      },
+    ])
+    .then((answers) => {
+      connection.query(
+        "INSERT INTO department SET ?",
+        [
+          {
+            name: answers.dep,
+          },
+        ],
+        function (error) {
+          if (error) throw err;
+          console.clear();
+          console.log("NEW DEPARTMENT ADDED SUCCESSFULLY!");
+          actions();
+        }
+      );
+    });
 }
+//! ----------------------------------------------------------
 
+//! DONE -----------------------------------------------------
 function removeDept() {
   // Case 15: Remove Department
   // Use Inquirer (list) to display current list of departments and ask which dept. to remove.
@@ -816,6 +852,66 @@ function removeDept() {
   // if "yes" then remove the department
   // if "no" then reshow the the department list
   // Possibly add "exit" to department list...
-  console.log("Case 15: Remove Department");
-  actions();
+  console.log(" ---------------- \n REMOVE A DEPARTMENT \n ----------------");
+  connection.query("SELECT d.name AS 'Dept' FROM department d", function (err, res) {
+    if (err) throw err;
+    const depResults = [];
+    for (let i = 0; i < res.length; i++) {
+      // simply for CLI UI to display list of existing employees to choose to update
+      let depObj = res[i].Dept;
+      depResults.push(depObj);
+    }
+    depResults.push("BACK TO MAIN MENU");
+    inquirer
+      .prompt([
+        {
+          name: "selectDep",
+          type: "list",
+          message: "Select the department to delete",
+          choices: depResults,
+        },
+      ])
+      .then((answers) => {
+        if (answers.selectDep !== "BACK TO MAIN MENU") {
+          connection.query(
+            "DELETE FROM department WHERE ?",
+            {
+              name: answers.selectDep,
+            },
+            function (error) {
+              if (error) throw err;
+              console.clear();
+              console.log("DEPARTMENT REMOVED SUCCESSFULLY!");
+              actions();
+            }
+          );
+        } else {
+          console.clear();
+          actions();
+        }
+      });
+  });
 }
+//! ----------------------------------------------------------
+
+//! DONE -----------------------------------------------------
+function viewBudget() {
+  connection.query(
+    "SELECT d.name AS 'Department', SUM(r.salary) AS 'Budget' FROM employee e INNER JOIN role r ON r.id = e.role_id INNER JOIN department d ON d.id = r.department_id GROUP BY Department;",
+    function (err, res) {
+      if (err) throw err;
+      let tableResults = [];
+      for (let i = 0; i < res.length; i++) {
+        let empObj = [res[i].Department, res[i].Budget];
+        tableResults.push(empObj);
+      }
+      console.clear();
+      console.log(
+        " ------------------------------------ \n ALL COMPANY DEPARTMENTS & BUDGET UTILIZED \n ------------------------------------"
+      );
+      console.table(["Department", "Budget"], tableResults);
+      actions();
+    }
+  );
+}
+//! ----------------------------------------------------------
