@@ -26,7 +26,7 @@ This application is a handy Node-based CLI application for querying employee inf
 
 ## Usage
 
-The below video provides an overview of the HRD Employee Tracking Admin application, the code involved and how it works, as well as a demo of the applicatio in action.
+The below video provides an overview of the HRD Employee Tracking Admin application, the code involved and how it works, as well as a demo of the application in action.
 
 [![OVERVIEW: THE HRD EMPLOYEE TRACKING ADMIN APP IN ACTION](https://chartroomcreative.com/gitassets/HRD-Employee_Tracking-App.png)](https://chartroomcreative.com/gitassets/HRD-Employee_Tracking-App.mp4)
 
